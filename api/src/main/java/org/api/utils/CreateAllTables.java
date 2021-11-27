@@ -23,7 +23,6 @@ public class CreateAllTables
         aloneProcessEngineConfiguration.setDatabaseSchemaUpdate("true");
         ProcessEngine processEngine =aloneProcessEngineConfiguration.buildProcessEngine();
         System.out.println(processEngine);
-        
-    	//System.out.println( "Hello World!" );
+
     }
 }
