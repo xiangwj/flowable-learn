@@ -1,5 +1,7 @@
 package org.api;
 
+import java.util.List;
+
 import javax.annotation.Resource;
 
 import org.flowable.bpmn.model.BpmnModel;
@@ -16,6 +18,9 @@ import org.flowable.engine.RepositoryService;
 import org.flowable.engine.RuntimeService;
 import org.flowable.engine.TaskService;
 import org.flowable.form.api.FormService;
+import org.flowable.validation.ProcessValidator;
+import org.flowable.validation.ProcessValidatorFactory;
+import org.flowable.validation.ValidationError;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -43,6 +48,20 @@ public class ProgramMoudle {
 	
 	@Test
 	public void testProgramGram() {
+		BpmnModel bpmnModel = generateBpmn();
+		repositoryService.createDeployment().addBpmnModel("ch5/leave5", bpmnModel).category("prodeploy").name("ch5/dev5").key("proleave").deploy();
+		
+	}
+	@Test
+	public void testValidat() {
+		ProcessValidatorFactory pf = new ProcessValidatorFactory();
+		ProcessValidator pv = pf.createDefaultProcessValidator();
+		List<ValidationError> errors =pv.validate(generateBpmn());
+		System.out.println(errors.size());
+		
+		
+	}
+	private BpmnModel generateBpmn() {
 		BpmnModel bpmnModel = new BpmnModel();
 		
 		StartEvent startEvent = new StartEvent();
@@ -80,10 +99,7 @@ public class ProgramMoudle {
 		process.addFlowElement(u3);
 		
 		bpmnModel.addProcess(process);
-		
-		
-		repositoryService.createDeployment().addBpmnModel("ch5/leave5", bpmnModel).category("prodeploy").name("ch5/dev5").key("proleave").deploy();
-		
+		return bpmnModel;
 	}
 	public SequenceFlow generateFlow(String id,String name, String source,String target) {
 		SequenceFlow se = new SequenceFlow();
