@@ -1,6 +1,8 @@
 package org.api;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Resource;
 
@@ -53,11 +55,13 @@ public class StartProcessTest {
 	}
 	@Test
 	public void queryPersonTask() {
-		String assignee="a";
+		String assignee="b";
 		List<Task> tasks = taskService.createTaskQuery().taskAssignee(assignee).orderByTaskCreateTime().desc().list();
 		for(Task task:tasks) {
 			System.out.println(task.getId());
 			System.out.println(task.getName());
+			System.out.println(taskService.getVariable(task.getId(), "请假的天数"));
+			System.out.println(taskService.getVariable(task.getId(), "请假的原因"));
 		}
 		
 	}
@@ -125,5 +129,46 @@ public class StartProcessTest {
 		for(HistoricProcessInstance instance:instances) {
 			System.out.println(instance.getProcessDefinitionId()+"\t"+instance.getId());
 		}
+	}
+	/**
+	 * 在流程中设置变量
+	 */
+	@Test
+	public void setVariable() {
+		String processDefinitionId="leave1:1:98ad4415-5045-11ec-b9a9-94de800f45a5";
+		ProcessInstance pi =runtimeService.startProcessInstanceById(processDefinitionId);
+		System.out.println("ID:"+pi.getId()+"\tactivitiid:"+pi.getActivityId());
+		
+		String assignee="a";
+		Map<String,Object> variables = new HashMap<>();
+		variables.put("请假的天数", 3);
+		variables.put("请假的原因", "家里有事");
+		List<Task> tasks = taskService.createTaskQuery().taskAssignee(assignee).orderByTaskCreateTime().desc().list();
+		for(Task task:tasks) {
+			taskService.complete(task.getId(), variables);
+		}
+		
+		assignee="b";
+		tasks = taskService.createTaskQuery().taskAssignee(assignee).orderByTaskCreateTime().desc().list();
+		variables = new HashMap<>();
+		for(Task task:tasks) {
+			variables.put("处理意见", "我同意了");
+			System.out.println(task.getId());
+			System.out.println(task.getName());
+			System.out.println(taskService.getVariable(task.getId(), "请假的天数"));
+			System.out.println(taskService.getVariable(task.getId(), "请假的原因"));
+			taskService.complete(task.getId(), variables);
+		}
+		
+		assignee="c";
+		tasks = taskService.createTaskQuery().taskAssignee(assignee).orderByTaskCreateTime().desc().list();
+		variables = new HashMap<>();
+		for(Task task:tasks) {
+			variables.put("处理意见", "我同意了");
+			System.out.println(task.getId());
+			System.out.println(task.getName());
+			taskService.setVariable(task.getId(),"意见","再处理一下");
+			taskService.complete(task.getId());
+		}	
 	}
 }
