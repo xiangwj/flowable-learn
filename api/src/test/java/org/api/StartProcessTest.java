@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.api.bo.Person;
 import org.flowable.engine.DynamicBpmnService;
 import org.flowable.engine.HistoryService;
 import org.flowable.engine.IdentityService;
@@ -145,6 +146,7 @@ public class StartProcessTest {
 		variables.put("请假的原因", "家里有事");
 		List<Task> tasks = taskService.createTaskQuery().taskAssignee(assignee).orderByTaskCreateTime().desc().list();
 		for(Task task:tasks) {
+			
 			taskService.complete(task.getId(), variables);
 		}
 		
@@ -153,6 +155,7 @@ public class StartProcessTest {
 		variables = new HashMap<>();
 		for(Task task:tasks) {
 			variables.put("处理意见", "我同意了");
+			taskService.setVariable(task.getId(), "person", new Person(100,"项文俊","西渡"));
 			System.out.println(task.getId());
 			System.out.println(task.getName());
 			System.out.println(taskService.getVariable(task.getId(), "请假的天数"));
@@ -167,8 +170,10 @@ public class StartProcessTest {
 			variables.put("处理意见", "我同意了");
 			System.out.println(task.getId());
 			System.out.println(task.getName());
+			System.out.println(taskService.getVariable(task.getId(), "person"));
 			taskService.setVariable(task.getId(),"意见","再处理一下");
-			taskService.complete(task.getId());
+			
 		}	
 	}
+
 }
